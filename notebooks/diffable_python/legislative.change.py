@@ -15,11 +15,14 @@
 #     name: python3
 # ---
 
+# # CD Legislative Changes - WIP
+#
 # During the last decade, controlled drugs legislation has been amended on various occasions due to concerns. In tis notebook we will set out to examine the impact of reclassification on Prescribing Patterns
 #
 # - [Gabapentinoids](#gaba)
 # - [Tramadol](#tramadol)
-# - [Zopiclone](#zdrugs) ->NOT STARTED YET
+# - [Zopiclone & Zaleplon](#zdrugs) ->NOT STARTED YET
+# - [Lisdexamfetamine](#lisdex) ->NOT STARTED YET
 # - [Overall Summary](#summ) -> NOT STARTED YET
 #
 #
@@ -65,7 +68,7 @@ plt.ylim(0, 30000000 )
 
 # # Tramadol <a id='tramadol'></a>
 
-# In June 2014 tramdol was reclassified as a schedule 3 CD and the [ONS reported 5% drop in tramadol prescribing](https://www.ons.gov.uk/peoplepopulationandcommunity/birthsdeathsandmarriages/deaths/bulletins/deathsrelatedtodrugpoisoninginenglandandwales/2015registrations) as well as the first fall in deaths related to tramadol since the first recorded death. The [Royal Pharmaceutical Society have a brefing here](https://www.rpharms.com/about-us/news/details/Rescheduling-of-gabapentin-and-pregabalin-to-Schedule-3-Controlled-Drugs-from-1-April-2019). OpenPrescribing item data goes back to 2011 but raw prescribing information only goes back to January 2014. We will do a two step analysis
+# In June 2014 tramdol was reclassified as a schedule 3 CD and the [ONS reported 5% drop in tramadol prescribing](https://www.ons.gov.uk/peoplepopulationandcommunity/birthsdeathsandmarriages/deaths/bulletins/deathsrelatedtodrugpoisoninginenglandandwales/2015registrations) as well as the first fall in deaths related to tramadol since the first recorded death. The [Royal Pharmaceutical Society have a brefing here](https://www.rpharms.com/about-us/news/details/Rescheduling-of-gabapentin-and-pregabalin-to-Schedule-3-Controlled-Drugs-from-1-April-2019) (login required). OpenPrescribing item data goes back to 2011 but raw prescribing information only goes back to January 2014. We will do a two step analysis
 # 1. Assess overall change in items and cost (indicative of qty) 
 #
 # 2. a) Work our total amounts of mg of tramadol dispensed in raw data for six months prior to the change. <br />
@@ -146,5 +149,60 @@ plt.ylim(0, 3500000000 )
 # •	https://www.rpharms.com/about-us/news/details/Controlled-drug-changes--tramadol--lisdexamfetamine--zopiclone-and-zaleplon
 #
 #
+
+# +
+sql4 = '''
+WITH
+bnf_tab AS (
+SELECT
+DISTINCT chemical,
+chemical_code
+FROM
+ebmdatalab.hscic.bnf )
+SELECT
+  month,
+  chemical,
+  SUM(items) AS total_items,
+  SUM(actual_cost) AS total_cost
+FROM
+  ebmdatalab.hscic.normalised_prescribing AS rx
+LEFT JOIN
+bnf_tab
+ON
+chemical_code =SUBSTR(rx.bnf_code,1,9)
+WHERE
+ bnf_code LIKE '0401010W0%' OR #zaleplon
+ bnf_code LIKE '0401010Z0%'    #zopiclone
+GROUP BY
+  month,
+  chemical
+ORDER BY
+  month
+'''
+
+df_z_drugs = bq.cached_read(sql4, csv_path=os.path.join('..', 'data', 'df_z_drugs.csv'))
+df_z_drugs['month'] = pd.to_datetime(df_z_drugs['month'])
+df_z_drugs.head(5)
+# -
+
+df_zopi = df_z_drugs.loc[df_z_drugs["chemical"] == "Zopiclone"]
+
+df_zap = df_z_drugs.loc[df_z_drugs["chemical"] == "Zaleplon"]
+
+ax = df_zap.groupby(["month"])['total_items'].sum().plot(kind='line', title="Total number of items for zaleplon")
+ax.axvline(pd.to_datetime('2014-06-01'), color='black', linestyle='--', lw=2) ##law change
+plt.ylim(0, )
+
+ax = df_zopi.groupby(["month"])['total_items'].sum().plot(kind='line', title="Total number of items for zopiclone")
+ax.axvline(pd.to_datetime('2014-06-01'), color='black', linestyle='--', lw=2) ##law change
+plt.ylim(0, 600000 )
+
+# +
+#next we'll just look at zopiclone to see affect on qty and total dose dispensed.
+
+
+# -
+
+# # Lisedexamfetamine <a id='lisdex'></a>
 
 # # Overall Summary <a id='summ'></a>
