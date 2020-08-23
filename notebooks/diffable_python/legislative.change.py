@@ -17,12 +17,12 @@
 
 # # CD Legislative Changes - WIP
 #
-# During the last decade, controlled drugs legislation has been amended on various occasions due to concerns. In tis notebook we will set out to examine the impact of reclassification on Prescribing Patterns
+# During the last decade, controlled drugs legislation has been amended on various occasions due to concerns. In this notebook we will set out to examine the impact of reclassification on Prescribing Patterns
 #
 # - [Gabapentinoids](#gaba)
 # - [Tramadol](#tramadol)
-# - [Zopiclone & Zaleplon](#zdrugs) ->NOT STARTED YET
-# - [Lisdexamfetamine](#lisdex) ->NOT STARTED YET
+# - [Zopiclone & Zaleplon](#zdrugs) 
+# - [Lisdexamfetamine](#lisdex) 
 # - [Overall Summary](#summ) -> NOT STARTED YET
 #
 #
@@ -198,13 +198,13 @@ ax.axvline(pd.to_datetime('2014-06-01'), color='black', linestyle='--', lw=2) ##
 plt.ylim(0, 600000 )
 
 # + [markdown]
-# It is recommended that a maximum quantity supplied should not exceed 30 days,for Schedule 2, 3 and 4 controlled drugs. Unlike tramadol & Gabapentinoids, zopiclone is prescribed once daily and there exists a single tablet. Therefore we can reasonably use the quantity on prescription  as a reasonable surrogate for the length of prescription e.g. 28 = 28 days. For practical 
+# It is recommended that a maximum quantity supplied should not exceed 30 days,for Schedule 2, 3 and 4 controlled drugs. Unlike tramadol & Gabapentinoids, zopiclone is prescribed once daily and there exists a single tablet. Therefore we can reasonably use the quantity on prescription  as a reasonable surrogate for the length of prescription e.g. 28 = 28 days. 
 #
 
 
 # +
-### here we extract data for modelling
-sql = '''
+### here we extract data for modelling we will use 31 days for one month.
+sql5 = '''
 SELECT
   CAST(month AS DATE) AS month,
   pct,
@@ -241,7 +241,7 @@ ORDER BY
   percent_qty_breach DESC
     '''
 
-df_zop_breach = bq.cached_read(sql, csv_path='zop_breach.csv')
+df_zop_breach = bq.cached_read(sql5, csv_path='zop_breach.csv')
 df_zop_breach['month'] = df_zop_breach['month'].astype('datetime64[ns]')
 df_zop_breach.head()
 # -
@@ -257,7 +257,7 @@ charts.deciles_chart(
         df_zop_breach,
         period_column='month',
         column='percent_qty_breach',
-        title="Proportion of one month quanity breaches of zopiclone (Devon - CCG) ",
+        title="Proportion of one month quantity breaches of zopiclone (Devon - CCG) ",
         show_outer_percentiles=True)
 
 #add in example CCG (Devon - 15N)
@@ -268,13 +268,44 @@ plt.show()
 # -
 
 ##Restrict to latest month (may-2019) to create a map
-may_df_zop = df_zop_breach.loc[(df_zop_breach['month'] == '2019-03-01')]
+may_df_zop = df_zop_breach.loc[(df_zop_breach['month'] == '2020-05-01')]
 
 #create choropeth map 
 plt.figure(figsize=(12, 7))
 plt = maps.ccg_map(may_df_zop, title="Proportion of one month quanity breaches of zopiclone", column='percent_qty_breach', separate_london=True)
 plt.show()
 
-# # Lisedexamfetamine <a id='lisdex'></a>
+# # Lisdexamfetamine <a id='lisdex'></a>
+#
+# Lisdexamfetamine will became a Schedule 2 controlled drug (CD POM) on June 10th 2014. Lisdexamfetamine has only been prescribed/dispensed in England since 2010, as an American import, with a licensed product [_Elvanse_](https://openprescribing.net/dmd/?q=elvanse&obj_types=vtm&obj_types=vmp&obj_types=amp&obj_types=vmpp&obj_types=ampp&include=unavailable&submit=Search) becoming available cicra 2013. The aim of reclassification of lisdexamfetamine was to apply the same controls that its prodrug dexamfetamine was already restricted under as opposed to recognised issues with this new medicine.
+
+# +
+sql6 = '''
+SELECT
+  month,
+  bnf_name,
+  bnf_code,
+  SUM(items) AS total_items,
+  SUM(actual_cost) AS total_cost
+FROM
+  ebmdatalab.hscic.normalised_prescribing AS rx
+WHERE
+ bnf_code LIKE '0404000U0%'
+GROUP BY
+  month,
+  bnf_name,
+  bnf_code
+ORDER BY
+  month
+'''
+
+df_lisdex = bq.cached_read(sql6, csv_path=os.path.join('..', 'data', 'df_lisdex.csv'))
+df_lisdex['month'] = pd.to_datetime(df_lisdex['month'])
+df_lisdex.head(5)
+# -
+
+ax = df_lisdex.groupby(["month"])['total_items'].sum().plot(kind='line', title="Total number of items for lisdexamfetamine")
+ax.axvline(pd.to_datetime('2014-06-01'), color='black', linestyle='--', lw=2) ##law change
+plt.ylim(0, )
 
 # # Overall Summary <a id='summ'></a>
