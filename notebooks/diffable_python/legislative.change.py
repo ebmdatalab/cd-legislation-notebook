@@ -25,7 +25,7 @@
 # - [Tramadol](#tramadol)
 # - [Zopiclone & Zaleplon](#zdrugs) 
 # - [Lisdexamfetamine](#lisdex) 
-# - [Overall Summary](#summ) -
+# - [Overall Summary](#summ) 
 #
 #
 
@@ -69,6 +69,7 @@ ax.axvline(pd.to_datetime('2019-04-01'), color='black', linestyle='--', lw=2) ##
 plt.ylim(0, 30000000 )
 
 # *Discussion* : Overall the changes to CD regulations fo not appear to have substantially changed prescribing of gabapentinoids. A visual inspection of the graph shows a possible levelling off of the total quanity prescribed.
+#
 # *TODO / Further Investigations*: ?
 
 # # Tramadol <a id='tramadol'></a>
@@ -148,6 +149,7 @@ ax.axvline(pd.to_datetime('2014-06-01'), color='black', linestyle='--', lw=2) ##
 plt.ylim(0, 3500000000 )
 
 # *Discussion*: There has been some reductions in tramadol changes indicating some success in the changes to regulations.
+#
 # *TODO / Further Investigations*: Finalise the Total number of mg graph across all products. 
 
 # # Z-Drugs <a id='zdrugs'></a>
@@ -283,7 +285,8 @@ plt.figure(figsize=(12, 7))
 plt = maps.ccg_map(may_df_zop, title="Proportion of one month quanity breaches of zopiclone", column='percent_qty_breach', separate_london=True)
 plt.show()
 
-# *Discussion*: Firstly changes to zaleplon schedules seem to have ensured the prescribing never took off but this could also be due to other reasons. The total number of zopicolne items remains largely unchanged since the changes but the amount of prescriptions for longer periods has decreased. However we do observe substantial variation in the rate of breaches of guidance to only prescribe a single months zopiclone at a time. 
+# *Discussion*: Firstly changes to zaleplon schedules seem to have ensured the prescribing never took off but this could also be due to other reasons. The total number of zopicolne items remains largely unchanged since the changes but the amount of prescriptions for longer periods has decreased. However we do observe substantial variation in the rate of breaches of guidance to only prescribe a single months zopiclone at a time.
+#
 # *TODO / Further Investigations* 1. Calculate the DDD/total mg for zopiclone 2. Get charts fixed. 
 
 # # Lisdexamfetamine <a id='lisdex'></a>
@@ -319,8 +322,9 @@ ax = df_lisdex.groupby(["month"])['total_items'].sum().plot(kind='line', title="
 ax.axvline(pd.to_datetime('2014-06-01'), color='black', linestyle='--', lw=2) ##law change
 plt.ylim(0, )
 
-* Discussion* Changes to CD regs for this new medicine are not possible to assess due to the very low rate pf prescribing prior to the changes. Uptake will be of interest to some folk.
-* TODO / Further investigation* nil
+# *Discussion* Changes to CD regs for this new medicine are not possible to assess due to the very low rate pf prescribing prior to the changes. Uptake will be of interest to some folk.
+#
+# *TODO / Further investigation* nil
 
 # # Overall Summary <a id='summ'></a>
 
