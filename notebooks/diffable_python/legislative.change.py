@@ -31,7 +31,7 @@
 import pandas as pd
 import matplotlib
 import matplotlib.pyplot as plt
-from ebmdatalab import bq
+from ebmdatalab import bq, charts, maps
 import os
 
 # # Gabapentinoids <a id='gaba'></a>
@@ -197,11 +197,83 @@ ax = df_zopi.groupby(["month"])['total_items'].sum().plot(kind='line', title="To
 ax.axvline(pd.to_datetime('2014-06-01'), color='black', linestyle='--', lw=2) ##law change
 plt.ylim(0, 600000 )
 
+# + [markdown]
+# It is recommended that a maximum quantity supplied should not exceed 30 days,for Schedule 2, 3 and 4 controlled drugs. Unlike tramadol & Gabapentinoids, zopiclone is prescribed once daily and there exists a single tablet. Therefore we can reasonably use the quantity on prescription  as a reasonable surrogate for the length of prescription e.g. 28 = 28 days. For practical 
+#
+
+
 # +
-#next we'll just look at zopiclone to see affect on qty and total dose dispensed.
+### here we extract data for modelling
+sql = '''
+SELECT
+  CAST(month AS DATE) AS month,
+  pct,
+  SUM(CASE
+      WHEN quantity_per_item>31 THEN items
+      ELSE 0
+  END) AS items_breach,
+  SUM(CASE
+      WHEN quantity_per_item>31 THEN total_quantity
+      ELSE 0
+  END) AS qty_breach,
+  SUM(total_quantity) AS all_QI,
+  IEEE_DIVIDE(SUM(CASE
+      WHEN quantity_per_item>31 THEN total_quantity
+      ELSE 0
+  END),
+      SUM(total_quantity)) AS percent_qty_breach
+FROM
+ ebmdatalab.hscic.raw_prescribing_normalised AS presc
+JOIN
+  hscic.ccgs AS ccgs
+ON
+presc.pct=ccgs.code
+WHERE
+bnf_code LIKE "0401010Z0%"   ##zopiclone
+AND
+bnf_name LIKE '%_tab%'  ##this restricts to tablets 
+AND
+ccgs.org_type='CCG'
+GROUP BY
+  month,
+  pct
+ORDER BY
+  percent_qty_breach DESC
+    '''
 
-
+df_zop_breach = bq.cached_read(sql, csv_path='zop_breach.csv')
+df_zop_breach['month'] = df_zop_breach['month'].astype('datetime64[ns]')
+df_zop_breach.head()
 # -
+
+ax = df_zop_breach.groupby(["month"])['items_breach'].sum().plot(kind='line', title="Total number of items for zopiclone that had greater than 31 days qty")
+ax.axvline(pd.to_datetime('2014-06-01'), color='black', linestyle='--', lw=2) ##law change
+plt.ylim(0,)
+
+# +
+#create sample deciles
+
+charts.deciles_chart(
+        df_zop_breach,
+        period_column='month',
+        column='percent_qty_breach',
+        title="Proportion of one month quanity breaches of zopiclone (Devon - CCG) ",
+        show_outer_percentiles=True)
+
+#add in example CCG (Devon - 15N)
+df_subject = df_zop_breach.loc[df_zop_breach['pct'] == '15N'].sort_values(by=['month'])
+plt.plot(df_subject['month'], df_subject['percent_qty_breach'], 'r--')
+
+plt.show()
+# -
+
+##Restrict to latest month (may-2019) to create a map
+may_df_zop = df_zop_breach.loc[(df_zop_breach['month'] == '2019-03-01')]
+
+#create choropeth map 
+plt.figure(figsize=(12, 7))
+plt = maps.ccg_map(may_df_zop, title="Proportion of one month quanity breaches of zopiclone", column='percent_qty_breach', separate_london=True)
+plt.show()
 
 # # Lisedexamfetamine <a id='lisdex'></a>
 
