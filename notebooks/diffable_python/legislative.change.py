@@ -17,13 +17,15 @@
 
 # # CD Legislative Changes - WIP
 #
+# **This notebook is a work in  progress and no conclusion should be taken as final - they are formative thoughts**
+#
 # During the last decade, controlled drugs legislation has been amended on various occasions due to concerns. In this notebook we will set out to examine the impact of reclassification on Prescribing Patterns
 #
 # - [Gabapentinoids](#gaba)
 # - [Tramadol](#tramadol)
 # - [Zopiclone & Zaleplon](#zdrugs) 
 # - [Lisdexamfetamine](#lisdex) 
-# - [Overall Summary](#summ) -> NOT STARTED YET
+# - [Overall Summary](#summ) -
 #
 #
 
@@ -65,6 +67,9 @@ df_gaba.head(5)
 ax = df_gaba.groupby(["month"])['total_gaba'].sum().plot(kind='line', title="Total Gabapentinoids DDD")
 ax.axvline(pd.to_datetime('2019-04-01'), color='black', linestyle='--', lw=2) ##law change
 plt.ylim(0, 30000000 )
+
+# *Discussion* : Overall the changes to CD regulations fo not appear to have substantially changed prescribing of gabapentinoids. A visual inspection of the graph shows a possible levelling off of the total quanity prescribed.
+# *TODO / Further Investigations*: ?
 
 # # Tramadol <a id='tramadol'></a>
 
@@ -141,6 +146,9 @@ df_raw_tramadol.head(5)
 ax = df_raw_tramadol.groupby(["month"])['tramadol_mg'].sum().plot(kind='line', title="Total number of mg for Tramadol 50mg caps")
 ax.axvline(pd.to_datetime('2014-06-01'), color='black', linestyle='--', lw=2) ##law change
 plt.ylim(0, 3500000000 )
+
+# *Discussion*: There has been some reductions in tramadol changes indicating some success in the changes to regulations.
+# *TODO / Further Investigations*: Finalise the Total number of mg graph across all products. 
 
 # # Z-Drugs <a id='zdrugs'></a>
 
@@ -275,6 +283,9 @@ plt.figure(figsize=(12, 7))
 plt = maps.ccg_map(may_df_zop, title="Proportion of one month quanity breaches of zopiclone", column='percent_qty_breach', separate_london=True)
 plt.show()
 
+# *Discussion*: Firstly changes to zaleplon schedules seem to have ensured the prescribing never took off but this could also be due to other reasons. The total number of zopicolne items remains largely unchanged since the changes but the amount of prescriptions for longer periods has decreased. However we do observe substantial variation in the rate of breaches of guidance to only prescribe a single months zopiclone at a time. 
+# *TODO / Further Investigations* 1. Calculate the DDD/total mg for zopiclone 2. Get charts fixed. 
+
 # # Lisdexamfetamine <a id='lisdex'></a>
 #
 # Lisdexamfetamine will became a Schedule 2 controlled drug (CD POM) on June 10th 2014. Lisdexamfetamine has only been prescribed/dispensed in England since 2010, as an American import, with a licensed product [_Elvanse_](https://openprescribing.net/dmd/?q=elvanse&obj_types=vtm&obj_types=vmp&obj_types=amp&obj_types=vmpp&obj_types=ampp&include=unavailable&submit=Search) becoming available cicra 2013. The aim of reclassification of lisdexamfetamine was to apply the same controls that its prodrug dexamfetamine was already restricted under as opposed to recognised issues with this new medicine.
@@ -308,4 +319,15 @@ ax = df_lisdex.groupby(["month"])['total_items'].sum().plot(kind='line', title="
 ax.axvline(pd.to_datetime('2014-06-01'), color='black', linestyle='--', lw=2) ##law change
 plt.ylim(0, )
 
+* Discussion* Changes to CD regs for this new medicine are not possible to assess due to the very low rate pf prescribing prior to the changes. Uptake will be of interest to some folk.
+* TODO / Further investigation* nil
+
 # # Overall Summary <a id='summ'></a>
+
+# - *Discussion* : Overall the changes to CD regulations do not appear to substantially affect prescribing patterns however it may result in some slowing of growth rates.
+# - *TODO / Further Investigations*: 
+#     - Add deaths from poisoning from these substances
+#     - Add TODOS for each section
+#     - Further investigation and documentation of specific changes
+#     - Consult with controlled drugs experts
+#     - Share summary for further investigation
